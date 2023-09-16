@@ -12,13 +12,79 @@ fn main() {
     zadanie4();
     zadanie5();
     zadanie6();
-    
-    println!()
+    zadanie7();
+    zadanie8(); 
+    println!();
+}
+
+fn zadanie8(){
+    println!("zadanie8");
+    let x = 15;
+    println!("x: {x}");
+    println!("x: {:b}", x);
+    println!("x: {:x}", x);
+    println!("x: {:X}", x);
+    println!("x: {:o}", x);
 }
 
 fn zadanie7(){
-    
+    println!("zadanie7");
+
+    let pesels = ["90090515836", "92071314764", "81100216357", "80072909146", "90080517455", "90060804786"];
+    let sample_pesel = "55030101193";
+
+    validate_pesel(sample_pesel);
+    for pesel in pesels{
+        let (is_valid, error) = validate_pesel(pesel);
+        let is_valid_text = if is_valid {""} else {" not"};
+        println!("pesel: {pesel} is{is_valid_text} valid. {error}");
+    }
 }
+
+fn validate_pesel(pesel: &str) -> (bool, String){
+    if pesel.len() != 11{
+        return (false, "Pesel length is not 11.".to_string());
+    }
+    if !has_only_digits(pesel){
+        return (false, "Pesel should only contain digits".to_string());
+    }
+
+    fn create_error_message(calculated_digit: i32, pesel_digit: i32) -> String{
+        return format!("Checksums don't match, calculated checksum: {calculated_digit}, pesel checksum: {pesel_digit}");
+    }
+
+
+    let m = calculate_checksum_digit_m(pesel);
+
+    let pesel_digit = pesel.chars().last().unwrap().to_string().parse::<i32>().unwrap();
+    if m == 0 {
+        let are_matching = pesel_digit == 0;
+        let error_message = if are_matching {"".to_string()} else {create_error_message(m, pesel_digit)};
+        return (are_matching, error_message);
+    }
+    let calculated_digit = 10 - m; 
+    let are_matching = calculated_digit == pesel_digit;
+    let error_message = if are_matching {"".to_string()} else {create_error_message(calculated_digit, pesel_digit)}; 
+    return (are_matching, error_message);
+}
+
+fn has_only_digits(pesel: &str) -> bool{
+    return pesel.chars().all(|x| char::is_numeric(x));
+}
+
+fn calculate_checksum_digit_m(pesel: &str) -> i32{
+    let weights = [1, 3, 7, 9, 1, 3, 7, 9, 1, 3];
+    let digits = pesel
+        .chars()
+        .take(10)
+        .map(|x| x.to_string().parse::<i32>().unwrap()).collect::<Vec<i32>>();
+
+    let weights_and_digits = weights.into_iter().zip(digits);
+
+    let sum = weights_and_digits.fold(0, |acc, (weight, digit)| acc + weight * digit);
+    return sum % 10;
+}
+
 
 fn zadanie6(){
     println!("zadanie6");
